@@ -1,0 +1,9 @@
+package com.cloudmirror.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.cloudmirror.entity.FaultEvent;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface FaultEventMapper extends BaseMapper<FaultEvent> {
+}

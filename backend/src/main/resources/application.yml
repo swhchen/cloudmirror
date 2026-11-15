@@ -1,0 +1,57 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: cloudmirror
+
+  datasource:
+    # 本机默认 127.0.0.1:3306；Docker 里用 DB_URL 环境变量覆盖（指向 mysql 服务）
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/cloudmirror?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 5000
+
+  # 建表脚本幂等：每次启动都执行，重复不会毁数据
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+      schema-locations: classpath:sql/init.sql
+      continue-on-error: false
+
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+
+logging:
+  file:
+    name: logs/cloudmirror.log
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%X{traceId}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId}] %logger{50} - %msg%n"
+  level:
+    com.cloudmirror: info
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+cloudmirror:
+  ai:
+    # Python AI 服务地址；连不上会自动降级为本地规则诊断
+    base-url: ${AI_BASE_URL:http://127.0.0.1:8010}

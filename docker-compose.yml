@@ -1,0 +1,56 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cm-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: cloudmirror
+      TZ: Asia/Shanghai
+    ports:
+      # 宿主机 3307，避免和本机已装的 MySQL80（3306）打架
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p123456"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  ai:
+    build: ./ai-service
+    container_name: cm-ai
+    environment:
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
+    ports:
+      - "8010:8010"
+
+  backend:
+    build: ./backend
+    container_name: cm-backend
+    environment:
+      DB_URL: "jdbc:mysql://mysql:3306/cloudmirror?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true"
+      MYSQL_USER: root
+      MYSQL_PASSWORD: "123456"
+      AI_BASE_URL: http://ai:8010
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ai:
+        condition: service_started
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: cm-frontend
+    depends_on:
+      - backend
+    ports:
+      # 浏览器打开 http://localhost:8088
+      - "8088:80"
+
+volumes:
+  mysql-data:

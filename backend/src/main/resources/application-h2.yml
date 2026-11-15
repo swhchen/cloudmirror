@@ -1,0 +1,18 @@
+# H2 本地联调 profile：机器上没有 MySQL、或者 MySQL 服务起不来时用
+# 启动：--spring.profiles.active=h2
+# 数据文件：backend/data/cloudmirror.mv.db（删掉即清库）
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/cloudmirror;MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;AUTO_SERVER=TRUE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+      schema-locations: classpath:sql/schema-h2.sql
+      continue-on-error: false

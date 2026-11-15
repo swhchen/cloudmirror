@@ -1,0 +1,64 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  /* 应用是固定视口布局，禁止整页滚动——否则弹窗聚焦时浏览器会把页面滚走，看起来像"消失了" */
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #0b1220;
+  color: #e2e8f0;
+  font-family: 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif;
+  font-size: 13px;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+button:hover {
+  background: #273449;
+}
+
+button.primary {
+  background: #0284c7;
+  border-color: #0ea5e9;
+}
+
+button.primary:hover {
+  background: #0ea5e9;
+}
+
+button.danger {
+  background: #7f1d1d;
+  border-color: #b91c1c;
+}
+
+input,
+select {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  border-radius: 5px;
+  padding: 4px 6px;
+  font-size: 12px;
+  width: 100%;
+}
+
+label {
+  display: block;
+  color: #94a3b8;
+  margin: 8px 0 3px;
+  font-size: 11px;
+}
