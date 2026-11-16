@@ -126,7 +126,7 @@ public class RecoveryPlanner {
     private boolean hasStandby(Long nodeId, List<ValidationModel.Group> groups, Set<Long> faulty) {
         for (ValidationModel.Group g : groups) {
             boolean isPrimary = g.members().stream()
-                    .anyMatch(m -> m.nodeId() == nodeId && ValidationModel.PRIMARY.equals(m.role()));
+                    .anyMatch(m -> m.nodeId() != null && m.nodeId().equals(nodeId) && ValidationModel.PRIMARY.equals(m.role()));
             if (!isPrimary) {
                 continue;
             }

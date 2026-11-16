@@ -139,7 +139,7 @@ public class CascadeAnalyzer {
     private ValidationModel.Group failoverGroupOf(Long nodeId, List<ValidationModel.Group> groups) {
         for (ValidationModel.Group g : groups) {
             boolean isPrimary = g.members().stream()
-                    .anyMatch(m -> m.nodeId() == nodeId && ValidationModel.PRIMARY.equals(m.role()));
+                    .anyMatch(m -> m.nodeId() != null && m.nodeId().equals(nodeId) && ValidationModel.PRIMARY.equals(m.role()));
             boolean failoverType = ValidationModel.ACTIVE_STANDBY.equals(g.type())
                     || ValidationModel.MANUAL_STANDBY.equals(g.type());
             if (isPrimary && failoverType) {

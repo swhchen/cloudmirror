@@ -90,4 +90,21 @@ class CascadeAnalyzerTest {
                 List.of(new Member(primary, ValidationModel.PRIMARY, null),
                         new Member(standby, ValidationModel.STANDBY, priority)));
     }
+
+    @Test
+    @DisplayName("大 ID（>127）也能识别主备并触发级联")
+    void largeIdsStillCascade() {
+        List<Node> nodes = List.of(
+                node(1001, "主", ValidationModel.MIDDLEWARE, 1),
+                node(1002, "备", ValidationModel.MIDDLEWARE, 1));
+        List<Group> groups = List.of(new Group(1001L, "主备", ValidationModel.ACTIVE_STANDBY,
+                List.of(new Member(1001L, ValidationModel.PRIMARY, null),
+                        new Member(1002L, ValidationModel.STANDBY, 1))));
+
+        CascadeAnalyzer.CascadeResult r = analyzer.analyze(nodes, groups,
+                List.of(new Fault(7, 1001, "主", "node_down", "critical")));
+
+        assertEquals(1, r.events().size(), "大 ID 下应仍能触发级联");
+        assertEquals(1002L, r.events().get(0).nodeId());
+    }
 }

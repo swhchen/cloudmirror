@@ -200,7 +200,7 @@ public class RecoveryService {
         ValidationModel.Group group = null;
         for (ValidationModel.Group g : groups) {
             boolean isPrimary = g.members().stream()
-                    .anyMatch(m -> m.nodeId() == faultyNodeId && ValidationModel.PRIMARY.equals(m.role()));
+                    .anyMatch(m -> m.nodeId() != null && m.nodeId().equals(faultyNodeId) && ValidationModel.PRIMARY.equals(m.role()));
             if (isPrimary && isFailoverType(g.type())) {
                 group = g;
                 break;
@@ -287,7 +287,7 @@ public class RecoveryService {
             return true;
         }
         return nodes.stream()
-                .filter(n -> n.id() == nodeId)
+                .filter(n -> n.id() != null && n.id().equals(nodeId))
                 .anyMatch(n -> "down".equalsIgnoreCase(n.status()));
     }
 

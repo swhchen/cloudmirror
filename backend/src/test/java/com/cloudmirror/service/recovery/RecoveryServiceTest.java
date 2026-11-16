@@ -248,4 +248,26 @@ class RecoveryServiceTest {
             assertEquals(first.toString(), run(nodes(), edges(), groups(), faults).toString());
         }
     }
+
+    @Test
+    @DisplayName("大 ID（>127）下备用切换仍判适用，且能选中备用")
+    void failoverWorksWithLargeIds() {
+        List<Node> nodes = List.of(
+                new Node(2001L, "网关", ValidationModel.GATEWAY, 1, 0.5, 2048, 256, 0, "healthy"),
+                new Node(2002L, "订单", ValidationModel.SERVICE, 0, 1, 0, 2048, 0, "healthy"),
+                new Node(2003L, "MySQL 主", ValidationModel.MIDDLEWARE, 4, 1, 8192, 2048, 200, "down"),
+                new Node(2004L, "MySQL 备", ValidationModel.MIDDLEWARE, 4, 1, 8192, 2048, 200, "healthy"));
+        List<Edge> edges = List.of(
+                edge(2101, 2001, 2002, ValidationModel.DEPENDS_ON),
+                edge(2102, 2002, 2003, ValidationModel.DEPENDS_ON));
+        List<Group> groups = List.of(new Group(2001L, "主备", ValidationModel.ACTIVE_STANDBY,
+                List.of(new Member(2003L, ValidationModel.PRIMARY, null),
+                        new Member(2004L, ValidationModel.STANDBY, 1))));
+
+        RecoveryResult r = run(nodes, edges, groups,
+                List.of(new Fault(1, 2003, "MySQL 主", "node_down", "critical")));
+
+        StrategyEvaluation failover = byType(r, StrategyType.FAILOVER);
+        assertTrue(failover.applicable(), "大 ID 下备用切换应适用");
+    }
 }
