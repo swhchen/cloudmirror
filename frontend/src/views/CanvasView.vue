@@ -450,7 +450,9 @@
     </div>
 
     <!-- 底部面板 -->
-    <div class="dock">
+    <div class="dock" :style="{ height: dockHeight + 'px' }">
+      <div class="dock-resizer" title="拖动调整高度，双击还原" @pointerdown.prevent="startDockResize"
+           @dblclick="resetDockHeight"></div>
       <div class="tabs">
         <button :class="{ active: dockTab === 'problems' }" @click="dockTab = 'problems'">
           问题 {{ validation ? validation.result.items.length : 0 }}
@@ -628,7 +630,38 @@ const connectDraft = ref(null)
 const portPicker = ref(null)
 const paletteSearch = ref('')
 const fileRef = ref(null)
+const dockHeight = ref(Number(localStorage.getItem('cm.dockHeight') || 190))
+const dockResizing = ref(false)
 let deletingEdge = false
+
+/** 底部面板高度可拖拽（向上拖变高，双击还原） */
+function startDockResize(event) {
+  dockResizing.value = true
+  const startY = event.clientY
+  const startHeight = dockHeight.value
+  const max = Math.max(240, window.innerHeight - 260)
+  const onMove = (e) => {
+    const next = Math.min(max, Math.max(90, startHeight + (startY - e.clientY)))
+    dockHeight.value = Math.round(next)
+  }
+  const onUp = () => {
+    dockResizing.value = false
+    window.removeEventListener('pointermove', onMove)
+    window.removeEventListener('pointerup', onUp)
+    document.body.style.cursor = ''
+    document.body.style.userSelect = ''
+    localStorage.setItem('cm.dockHeight', String(dockHeight.value))
+  }
+  window.addEventListener('pointermove', onMove)
+  window.addEventListener('pointerup', onUp)
+  document.body.style.cursor = 'row-resize'
+  document.body.style.userSelect = 'none'
+}
+
+function resetDockHeight() {
+  dockHeight.value = 190
+  localStorage.setItem('cm.dockHeight', '190')
+}
 const faultType = ref('node_down')
 
 const validation = ref(null)
@@ -2417,6 +2450,35 @@ onBeforeUnmount(() => {
   border-top: 1px solid #1e293b;
   display: flex;
   flex-direction: column;
+  position: relative;
+  min-height: 90px;
+  flex: none;
+}
+
+.dock-resizer {
+  height: 8px;
+  margin-top: -4px;
+  margin-bottom: -4px;
+  cursor: row-resize;
+  z-index: 5;
+  position: relative;
+}
+
+.dock-resizer::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  width: 44px;
+  height: 3px;
+  margin-left: -22px;
+  border-radius: 2px;
+  background: #334155;
+  transition: background 0.15s ease;
+}
+
+.dock-resizer:hover::after {
+  background: #38bdf8;
 }
 
 .tabs {
